@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simrat Singh Gandhi — Product Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0E0D0B;
+    --fg: #E8E2D9;
+    --muted: #7A7368;
+    --accent: #C97941;
+    --accent-dim: rgba(201,121,65,0.4);
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Outfit', sans-serif;
+    overflow: hidden;
+    height: 100%;
+    cursor: none;
+  }
+
+  @media (pointer: coarse) {
+    html, body { cursor: auto; }
+    #cursor-dot, #cursor-ring { display: none !important; }
+  }
+
+  canvas { display: block; }
+
+  /* ═══ PRELOADER ═══ */
+  #preloader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    transition: opacity 0.8s ease;
+  }
+  #preloader.done { opacity: 0; pointer-events: none; }
+  #preloader .pre-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 24px;
+    color: var(--fg);
+    opacity: 0;
+    animation: preFadeIn 1s ease 0.3s forwards;
+  }
+  #preloader .pre-bar-track {
+    width: 200px;
+    height: 2px;
+    background: rgba(122,115,104,0.2);
+    border-radius: 1px;
+    overflow: hidden;
+    opacity: 0;
+    animation: preFadeIn 1s ease 0.6s forwards;
+  }
+  #preloader .pre-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+  #preloader .pre-percent {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    font-weight: 300;
+    opacity: 0;
+    animation: preFadeIn 1s ease 0.9s forwards;
+  }
+  @keyframes preFadeIn { to { opacity: 1; } }
+
+  /* ═══ CUSTOM CURSOR ═══ */
+  #cursor-dot {
+    position: fixed; width: 8px; height: 8px;
+    background: var(--accent); border-radius: 50%;
+    pointer-events: none; z-index: 8999;
+    transform: translate(-50%, -50%);
+  }
+  #cursor-ring {
+    position: fixed; width: 36px; height: 36px;
+    border: 1.5px solid var(--accent-dim); border-radius: 50%;
+    pointer-events: none; z-index: 8998;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+  }
+  #cursor-ring.hovering { width: 60px; height: 60px; border-color: var(--fg); }
+
+  /* ═══ PROGRESS BAR ═══ */
+  #progress {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: var(--accent); z-index: 500; width: 0%;
+    transition: width 0.05s linear;
+  }
+
+  /* ═══ HEADER ═══ */
+  #header {
+    position: fixed; top: 0; left: 0; right: 0;
+    padding: 28px 40px;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 400; pointer-events: none;
+    background: transparent; transition: background 0.5s ease;
+  }
+  #header.scrolled {
+    background: rgba(14,13,11,0.85);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  #header .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px; font-weight: 500; letter-spacing: 0.5px; color: var(--fg);
+  }
+  #header .nav { display: flex; gap: 28px; pointer-events: auto; }
+  #header .nav a {
+    font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--muted); text-decoration: none; font-weight: 300;
+    transition: color 0.3s ease; position: relative;
+  }
+  #header .nav a::after {
+    content: ''; position: absolute; bottom: -4px; left: 0;
+    width: 0%; height: 1px; background: var(--accent); transition: width 0.3s ease;
+  }
+  #header .nav a:hover { color: var(--fg); }
+  #header .nav a:hover::after { width: 100%; }
+
+  #hamburger {
+    display: none; width: 24px; height: 16px;
+    flex-direction: column; justify-content: space-between;
+    pointer-events: auto; cursor: pointer; z-index: 600;
+  }
+  #hamburger span { display: block; width: 100%; height: 1.5px; background: var(--fg); transition: 0.3s ease; }
+  #hamburger span:nth-child(2) { width: 55%; margin-left: auto; }
+
+  #mobile-menu {
+    display: none; position: fixed; inset: 0;
+    background: rgba(14,13,11,0.96); z-index: 550;
+    flex-direction: column; align-items: center; justify-content: center; gap: 32px;
+    opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+  }
+  #mobile-menu.open { opacity: 1; pointer-events: auto; }
+  #mobile-menu a {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: 28px; color: var(--fg); text-decoration: none;
+    opacity: 0.7; transition: opacity 0.3s ease;
+  }
+  #mobile-menu a:hover { opacity: 1; }
+
+  @media (max-width: 768px) {
+    #header .nav { display: none; }
+    #hamburger { display: flex; }
+    #mobile-menu { display: flex; }
+    #header { padding: 24px 20px; }
+    #intro { padding: 0 24px 100px !important; }
+    #intro .intro-title { font-size: 13px !important; }
+    #intro .intro-line { font-size: 11px !important; }
+    #piece-info { display: none !important; }
+    #mobile-piece-info { display: block !important; }
+  }
+
+  /* ═══ INTRO ═══ */
+  #intro {
+    position: fixed; bottom: 0; left: 0; padding: 0 48px 80px;
+    z-index: 300; pointer-events: none; max-width: 600px;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  #intro.hidden { opacity: 0; transform: translateY(30px); }
+  #intro .intro-title {
+    font-size: 14px; letter-spacing: 5px; text-transform: uppercase;
+    color: var(--accent); font-weight: 400; margin-bottom: 16px;
+  }
+  #intro .intro-line {
+    font-size: 13px; line-height: 1.8; color: var(--muted);
+    font-weight: 300; letter-spacing: 0.5px;
+  }
+  #intro .intro-scroll {
+    margin-top: 28px; display: flex; align-items: center; gap: 10px;
+  }
+  #intro .intro-scroll span {
+    font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--accent); font-weight: 300;
+  }
+  #intro .intro-scroll .scroll-line {
+    width: 40px; height: 1px; background: var(--accent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleX(0.5); transform-origin: left; }
+    50% { opacity: 1; transform: scaleX(1); }
+  }
+
+  /* ═══ PIECE INFO (Desktop) ═══ */
+  #piece-info {
+    position: fixed; z-index: 300; pointer-events: none;
+    opacity: 0; transition: opacity 0.4s ease;
+  }
+  #piece-info.visible { opacity: 1; }
+  #piece-info .piece-collection {
+    font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--accent); font-weight: 400; margin-bottom: 6px;
+  }
+  #piece-info .piece-name {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: 26px; color: var(--fg); line-height: 1.2; max-width: 320px;
+  }
+  #piece-info .piece-cta {
+    font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--accent); margin-top: 14px; font-weight: 400;
+    display: flex; align-items: center; gap: 8px;
+  }
+  #piece-info .cta-arrow {
+    display: inline-block; width: 20px; height: 1px;
+    background: var(--accent); position: relative;
+  }
+  #piece-info .cta-arrow::after {
+    content: ''; position: absolute; right: 0; top: -3px;
+    width: 7px; height: 7px;
+    border-right: 1px solid var(--accent); border-top: 1px solid var(--accent);
+    transform: rotate(45deg);
+  }
+
+  /* ═══ MOBILE PIECE INFO ═══ */
+  #mobile-piece-info {
+    display: none; position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 0 24px 44px; z-index: 300; pointer-events: none;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  #mobile-piece-info.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  #mobile-piece-info .mob-line { width: 28px; height: 2px; background: var(--accent); margin-bottom: 10px; }
+  #mobile-piece-info .mob-name {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: 22px; color: var(--fg); line-height: 1.3;
+  }
+  #mobile-piece-info .mob-cta {
+    display: inline-flex; align-items: center; gap: 10px; margin-top: 14px; cursor: pointer;
+  }
+  #mobile-piece-info .mob-cta span { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); }
+  #mobile-piece-info .mob-cta-circle {
+    width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #mobile-piece-info .mob-cta-circle svg { width: 12px; height: 12px; stroke: var(--accent); fill: none; stroke-width: 1.5; }
+
+  /* ═══ PIECE COUNTER ═══ */
+  #piece-counter {
+    position: fixed; right: 36px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    z-index: 300; pointer-events: none;
+  }
+  .counter-pip {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--muted); opacity: 0.25; transition: all 0.4s ease;
+  }
+  .counter-pip.active { opacity: 1; background: var(--accent); height: 18px; border-radius: 2px; }
+
+  /* ═══ TRANSITION ═══ */
+  #transition {
+    position: fixed; inset: 0; background: var(--bg); z-index: 700;
+    opacity: 0; pointer-events: none;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.7s ease;
+  }
+  #transition.active { opacity: 1; pointer-events: all; }
+  #transition .trans-text {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: 28px; color: var(--fg); opacity: 0; transition: opacity 0.5s ease 0.3s;
+  }
+  #transition.active .trans-text { opacity: 1; }
+
+  /* ═══ GRAIN ═══ */
+  #grain {
+    position: fixed; inset: 0; z-index: 200; pointer-events: none; opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat; background-size: 128px 128px;
+  }
+</style>
+</head>
+<body>
+
+<div id="preloader">
+  <div class="pre-text">Entering Studio...</div>
+  <div class="pre-bar-track"><div class="pre-bar-fill" id="preBarFill"></div></div>
+  <div class="pre-percent" id="prePercent">0%</div>
+</div>
+
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+<div id="grain"></div>
+<div id="progress"></div>
+
+<div id="header">
+  <div class="logo">Simrat Singh Gandhi</div>
+  <div class="nav">
+    <a href="#work">Work</a>
+    <a href="#playground">Playground</a>
+    <a href="#about">About</a>
+    <a href="#resume">Resume</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div id="hamburger" onclick="toggleMobile()">
+    <span></span><span></span><span></span>
+  </div>
+</div>
+
+<div id="mobile-menu">
+  <a href="#work" onclick="toggleMobile()">Work</a>
+  <a href="#playground" onclick="toggleMobile()">Playground</a>
+  <a href="#about" onclick="toggleMobile()">About</a>
+  <a href="#resume" onclick="toggleMobile()">Resume</a>
+  <a href="#contact" onclick="toggleMobile()">Contact</a>
+</div>
+
+<div id="intro">
+  <div class="intro-title">Product Designer</div>
+  <div class="intro-line">Designing conversations first to create user informed products, furniture and decor.</div>
+  <div class="intro-line" style="margin-top: 6px;">Specialize in creating generative systems for reducing iteration and prototyping times.</div>
+  <div class="intro-scroll">
+    <span>Scroll to explore</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<div id="piece-info">
+  <div class="piece-collection" id="pieceCollection"></div>
+  <div class="piece-name" id="pieceName"></div>
+  <div class="piece-cta">Enter Project <span class="cta-arrow"></span></div>
+</div>
+
+<div id="mobile-piece-info">
+  <div class="mob-line"></div>
+  <div class="mob-name" id="mobPieceName"></div>
+  <div class="mob-cta" id="mobCta">
+    <span>Enter project</span>
+    <div class="mob-cta-circle">
+      <svg viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+    </div>
+  </div>
+</div>
+
+<div id="piece-counter">
+  <div class="counter-pip" data-i="0"></div>
+  <div class="counter-pip" data-i="1"></div>
+  <div class="counter-pip" data-i="2"></div>
+  <div class="counter-pip" data-i="3"></div>
+  <div class="counter-pip" data-i="4"></div>
+</div>
+
+<div id="transition">
+  <div class="trans-text" id="transText"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+<script>
+(() => {
+  'use strict';
+
+  // ══════════════════════════════════════
+  // CONFIG
+  // ══════════════════════════════════════
+  const STUDIO_URL = 'https://raw.githubusercontent.com/Pachenko7/3D-Assets/main/Studio.glb';
+
+  // Interactive pieces — names must match Blender object/collection names
+  // Order: anticlockwise — Atelier (right) → Zephyr (center) → Bloom (left)
+  const INTERACTIVE_PIECES = [
+    {
+      blenderName: 'Easel',       // must match object name in Blender
+      displayName: 'Easel',
+      desc: 'Designed for painters/artists with changing posture needs',
+      collection: 'The Atelier Collection',
+      link: '#project-easel',
+      closeup: { pos: { x: -1.02, y: 1.33, z: -3.35 }, look: { x: 0.30, y: 0.73, z: -4.73 }, fov: 22.0 }
+    },
+    {
+      blenderName: 'Canvas',
+      displayName: 'Canvas',
+      desc: 'Designed for artists with a 9 to 5',
+      collection: 'The Atelier Collection',
+      link: '#project-canvas',
+      closeup: { pos: { x: 0.31, y: 1.33, z: -2.76 }, look: { x: 1.68, y: 0.82, z: -4.12 }, fov: 22.0 }
+    },
+    {
+      blenderName: 'Palette',
+      displayName: 'Palette',
+      desc: 'Designed for den rooms with multiple table needs',
+      collection: 'The Atelier Collection',
+      link: '#project-palette',
+      closeup: { pos: { x: 0.91, y: 1.33, z: -1.63 }, look: { x: 2.31, y: 0.87, z: -2.99 }, fov: 22.0 }
+    },
+    {
+      blenderName: 'Zephyr',
+      displayName: 'Zephyr',
+      desc: 'Designed for gamers and their action figures',
+      collection: '',
+      link: '#project-zephyr',
+      spotConfig: { intensity: 7.5, angle: Math.PI / 5, height: 4, offsetZ: 0 },
+      closeup: { pos: { x: -0.22, y: 1.33, z: -2.77 }, look: { x: -1.58, y: 1.03, z: -4.20 }, fov: 22.0 }
+    },
+    {
+      blenderName: 'Bloom',
+      displayName: 'Bloom',
+      desc: 'Customizable potted planters',
+      collection: '',
+      link: '#project-bloom',
+      namePattern: /^Bloom\d+$/,
+      spotConfig: { intensity: 11, angle: Math.PI / 3.5, height: 4, offsetX: 1.5, offsetZ: 0 },
+      closeup: { pos: { x: -0.57, y: 2.35, z: -1.58 }, look: { x: -2.57, y: 2.31, z: -1.64 }, fov: 22.0 }
+    }
+  ];
+
+  // Camera path — anticlockwise: entrance → Atelier (right) → Zephyr (center) → Bloom (left)
+  // These will need tuning once we see how the GLB loads.
+  // The Y axis is up. Camera at ~1.6m (human eye height).
+  // Blender Y-forward becomes Three.js Z-forward, Blender Z-up becomes Three.js Y-up.
+  const CAMERA_PATH = [
+    // ── START ──
+    { t: 0.00, pos: { x: -0.51, y: 2.59, z: 8.78 }, look: { x: -0.51, y: 2.42, z: 6.79 }, fov: 22.0 },
+    { t: 0.06, pos: { x: -0.51, y: 2.59, z: 8.78 }, look: { x: -0.51, y: 2.42, z: 6.79 }, fov: 22.0 }, // hold
+
+    // ── STOP 1: ATELIER COLLECTION ──
+    { t: 0.26, pos: { x: -4.10, y: 1.99, z: 1.41 }, look: { x: -2.70, y: 1.85, z: -0.01 }, fov: 24.0 },
+    { t: 0.34, pos: { x: -4.10, y: 1.99, z: 1.41 }, look: { x: -2.70, y: 1.85, z: -0.01 }, fov: 24.0 }, // hold
+
+    // ── STOP 2: GAMING DESK (ZEPHYR) ──
+    { t: 0.50, pos: { x: 3.78, y: 1.99, z: 1.07 }, look: { x: 2.35, y: 1.88, z: -0.33 }, fov: 24.0 },
+    { t: 0.58, pos: { x: 3.78, y: 1.99, z: 1.07 }, look: { x: 2.35, y: 1.88, z: -0.33 }, fov: 24.0 }, // hold
+
+    // ── STOP 3: BLOOM ──
+    { t: 0.74, pos: { x: 3.42, y: 1.66, z: -1.84 }, look: { x: 1.42, y: 1.59, z: -1.85 }, fov: 28.0 },
+    { t: 0.82, pos: { x: 3.42, y: 1.66, z: -1.84 }, look: { x: 1.42, y: 1.59, z: -1.85 }, fov: 28.0 }, // hold
+
+    // ── BACK TO START (loop) ──
+    { t: 1.00, pos: { x: -0.51, y: 2.59, z: 8.78 }, look: { x: -0.51, y: 2.42, z: 6.79 }, fov: 22.0 },
+  ];
+
+  // Scroll zones — which piece is "active" at what scroll position
+  const ZONES = [
+    { center: 0.30, range: 0.08 },  // Atelier Collection
+    { center: 0.54, range: 0.08 },  // Gaming Desk (Zephyr)
+    { center: 0.78, range: 0.08 },  // Bloom
+  ];
+
+  // ══════════════════════════════════════
+  // SCENE
+  // ══════════════════════════════════════
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0E0D0B);
+  scene.fog = new THREE.FogExp2(0x0E0D0B, 0.04);
+
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.95;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.physicallyCorrectLights = true;
+
+  // Neutral environment map for accurate PBR colors (low intensity, used for material color not lighting)
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  pmrem.compileEquirectangularShader();
+  scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+  document.body.appendChild(renderer.domElement);
+
+  // ══════════════════════════════════════
+  // LIGHTING
+  // ══════════════════════════════════════
+  scene.add(new THREE.AmbientLight(0xE8E2D9, 0.25));
+
+  // Strong directional key for cinematic shadows + contrast
+  const keyLight = new THREE.DirectionalLight(0xFFF1DC, 2.2);
+  keyLight.position.set(-4, 8, 6);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(2048, 2048);
+  keyLight.shadow.camera.near = 0.5;
+  keyLight.shadow.camera.far = 30;
+  keyLight.shadow.camera.left = -10;
+  keyLight.shadow.camera.right = 10;
+  keyLight.shadow.camera.top = 10;
+  keyLight.shadow.camera.bottom = -10;
+  keyLight.shadow.bias = -0.0005;
+  keyLight.shadow.radius = 4;
+  scene.add(keyLight);
+
+  // Subtle warm fill from opposite side
+  const fillLight = new THREE.DirectionalLight(0xC9B79A, 0.35);
+  fillLight.position.set(3, 3, 2);
+  scene.add(fillLight);
+
+  // ══════════════════════════════════════
+  // LOAD STUDIO GLB
+  // ══════════════════════════════════════
+  const loadingManager = new THREE.LoadingManager();
+  const preBarFill = document.getElementById('preBarFill');
+  const prePercent = document.getElementById('prePercent');
+
+  loadingManager.onProgress = (url, loaded, total) => {
+    const pct = Math.round((loaded / total) * 100);
+    preBarFill.style.width = pct + '%';
+    prePercent.textContent = pct + '%';
+  };
+
+  let sceneReady = false;
+  loadingManager.onLoad = () => {
+    preBarFill.style.width = '100%';
+    prePercent.textContent = '100%';
+    setTimeout(() => {
+      document.getElementById('preloader').classList.add('done');
+      sceneReady = true;
+    }, 600);
+  };
+
+  const dracoLoader = new THREE.DRACOLoader();
+  dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+
+  const gltfLoader = new THREE.GLTFLoader(loadingManager);
+  gltfLoader.setDRACOLoader(dracoLoader);
+
+  // Store references to interactive pieces
+  const interactiveMeshes = [];  // for raycasting
+  const pieceObjects = {};       // name → THREE.Object3D
+
+  gltfLoader.load(STUDIO_URL, (gltf) => {
+    const studioScene = gltf.scene;
+
+    // Enable shadows + fix texture encoding on all meshes
+    const ENV_COLOR = new THREE.Color(0x0E0D0B);
+    studioScene.traverse(child => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        const mats = Array.isArray(child.material) ? child.material : (child.material ? [child.material] : []);
+        mats.forEach(m => {
+          if (m.map) m.map.encoding = THREE.sRGBEncoding;
+          if (m.emissiveMap) m.emissiveMap.encoding = THREE.sRGBEncoding;
+          m.envMapIntensity = 0.5;
+          m.needsUpdate = true;
+        });
+        // Override podium / wall / floor / ceiling to black
+        if (/podium|wall|floor|ceiling|ground|backdrop|plinth|base/i.test(child.name)) {
+          mats.forEach(m => {
+            m.map = null;
+            m.color = ENV_COLOR.clone();
+            m.roughness = 1.0;
+            m.metalness = 0.0;
+            m.needsUpdate = true;
+          });
+        }
+        // Override text to a clean default material
+        if (/^text/i.test(child.name)) {
+          child.material = new THREE.MeshStandardMaterial({
+            color: 0xE8E2D9,
+            roughness: 0.55,
+            metalness: 0.0
+          });
+        }
+      }
+    });
+
+    // Find interactive pieces by name
+    INTERACTIVE_PIECES.forEach(piece => {
+      // Resolve to one or more objects: either by exact name or by regex pattern
+      let objs = [];
+      if (piece.namePattern) {
+        studioScene.traverse(o => {
+          if (piece.namePattern.test(o.name)) objs.push(o);
+        });
+      } else {
+        const o = studioScene.getObjectByName(piece.blenderName);
+        if (o) objs.push(o);
+      }
+
+      if (objs.length === 0) {
+        console.warn('Could not find object:', piece.blenderName);
+        return;
+      }
+
+      // Use first object as the canonical reference for camera/closeup logic
+      pieceObjects[piece.blenderName] = objs[0];
+      objs[0].userData.pieceData = piece;
+
+      // Collect all meshes under each matched object for raycasting + hover highlight
+      objs.forEach(obj => {
+        obj.traverse(child => {
+          if (child.isMesh) {
+            child.userData.pieceName = piece.blenderName;
+            interactiveMeshes.push(child);
+            if (Array.isArray(child.material)) {
+              child.material = child.material.map(m => m.clone());
+            } else if (child.material) {
+              child.material = child.material.clone();
+            }
+            const mats = Array.isArray(child.material) ? child.material : [child.material];
+            mats.forEach(m => {
+              if (m && m.emissive) {
+                m.userData = m.userData || {};
+                m.userData._origEmissive = m.emissive.clone();
+                m.userData._origEmissiveIntensity = m.emissiveIntensity ?? 1;
+              }
+            });
+            child.userData._highlight = 0;
+          }
+        });
+      });
+
+      // Compute centroid of all matched objects (for grouped pieces like Bloom)
+      const centroid = new THREE.Vector3();
+      const tmp = new THREE.Vector3();
+      objs.forEach(o => {
+        o.getWorldPosition(tmp);
+        centroid.add(tmp);
+      });
+      centroid.divideScalar(objs.length);
+
+      // Add a spotlight above the piece (with optional per-piece config)
+      const cfg = piece.spotConfig || {};
+      const intensity = cfg.intensity ?? 5.5;
+      const angle = cfg.angle ?? (Math.PI / 6);
+      const height = cfg.height ?? 4;
+      const offsetX = cfg.offsetX ?? 0;
+      const offsetZ = cfg.offsetZ ?? 0;  // positive Z = forward (toward camera, away from wall)
+      const spot = new THREE.SpotLight(0xFFF1DC, intensity, 14, angle, 0.5, 1.2);
+      spot.position.set(centroid.x + offsetX, centroid.y + height, centroid.z + offsetZ);
+      spot.target.position.copy(centroid);
+      spot.castShadow = true;
+      spot.shadow.mapSize.set(512, 512);
+      spot.shadow.bias = -0.0005;
+      scene.add(spot);
+      scene.add(spot.target);
+    });
+
+    scene.add(studioScene);
+
+    // ── TEXT MESH (uses default material from GLB) ────────────
+    // ─────────────────────────────────────────────────────────
+
+    // Debug: log all object names to help with tuning
+    console.log('=== Studio objects ===');
+    studioScene.traverse(child => {
+      if (child.name) console.log(child.name, child.type, child.position);
+    });
+
+  }, undefined, (err) => {
+    console.error('Failed to load Studio.glb:', err);
+  });
+
+  // ══════════════════════════════════════
+  // STATE
+  // ══════════════════════════════════════
+  let scrollProgress = 0;
+  let targetScroll = 0;
+  let hasLooped = false; // becomes true once user reaches t=1 the first time
+  let isWalkingIn = false;
+  let hoveredPiece = null;
+  let activePieceIndex = -1;
+  let cursorX = 0, cursorY = 0, ringX = 0, ringY = 0;
+
+  // ══════════════════════════════════════
+  // SCROLL
+  // ══════════════════════════════════════
+  window.addEventListener('wheel', (e) => {
+    if (!sceneReady || isWalkingIn) return;
+    targetScroll += e.deltaY * 0.00035;
+    if (!hasLooped) {
+      targetScroll = Math.max(0, Math.min(1, targetScroll));
+      if (targetScroll >= 1) hasLooped = true;
+    }
+  }, { passive: true });
+
+  let touchStart = 0;
+  window.addEventListener('touchstart', e => { touchStart = e.touches[0].clientY; }, { passive: true });
+  window.addEventListener('touchmove', e => {
+    if (!sceneReady || isWalkingIn) return;
+    const delta = touchStart - e.touches[0].clientY;
+    touchStart = e.touches[0].clientY;
+    targetScroll += delta * 0.001;
+    if (!hasLooped) {
+      targetScroll = Math.max(0, Math.min(1, targetScroll));
+      if (targetScroll >= 1) hasLooped = true;
+    }
+  }, { passive: true });
+
+  // ══════════════════════════════════════
+  // CAMERA INTERPOLATION
+  // ══════════════════════════════════════
+  function lerpV(a, b, t) {
+    return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, z: a.z + (b.z - a.z) * t };
+  }
+
+  const DEFAULT_FOV = 50;
+  function getCameraState(t) {
+    let i = 0;
+    while (i < CAMERA_PATH.length - 2 && CAMERA_PATH[i + 1].t < t) i++;
+    const a = CAMERA_PATH[i], b = CAMERA_PATH[i + 1];
+    const seg = (t - a.t) / (b.t - a.t);
+    const s = seg * seg * (3 - 2 * seg);
+    const fovA = a.fov ?? DEFAULT_FOV;
+    const fovB = b.fov ?? fovA;
+    return { pos: lerpV(a.pos, b.pos, s), look: lerpV(a.look, b.look, s), fov: fovA + (fovB - fovA) * s };
+  }
+
+  // ══════════════════════════════════════
+  // RAYCASTING
+  // ══════════════════════════════════════
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  const HIGHLIGHT_COLOR = new THREE.Color(0xffd9a0); // warm accent for hover glow
+
+  window.addEventListener('mousemove', e => {
+    cursorX = e.clientX;
+    cursorY = e.clientY;
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  });
+
+  window.addEventListener('click', () => {
+    if (hoveredPiece && !isWalkingIn && sceneReady && !debugMode) {
+      walkIntoPiece(hoveredPiece);
+    }
+  });
+
+  document.getElementById('mobCta').addEventListener('click', () => {
+    if (activePieceIndex >= 0 && !isWalkingIn) {
+      walkIntoPiece(INTERACTIVE_PIECES[activePieceIndex]);
+    }
+  });
+
+  function walkIntoPiece(piece) {
+    isWalkingIn = true;
+    const overlay = document.getElementById('transition');
+    const text = document.getElementById('transText');
+    text.textContent = piece.displayName;
+
+    const obj = pieceObjects[piece.blenderName];
+    if (!obj) return;
+
+    const targetWorld = new THREE.Vector3();
+    obj.getWorldPosition(targetWorld);
+
+    // Use per-piece closeup if defined, otherwise heuristic fallback
+    let endPos, endLook, endFov;
+    if (piece.closeup) {
+      endPos = piece.closeup.pos;
+      endLook = piece.closeup.look;
+      endFov = piece.closeup.fov ?? camera.fov;
+    } else {
+      endPos = { x: targetWorld.x * 0.6, y: targetWorld.y + 1.2, z: targetWorld.z + 1.5 };
+      endLook = { x: targetWorld.x, y: targetWorld.y + 0.5, z: targetWorld.z };
+      endFov = camera.fov;
+    }
+
+    const startPos = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+    const startLook = new THREE.Vector3();
+    camera.getWorldDirection(startLook);
+    startLook.multiplyScalar(2).add(camera.position);
+    const startLookObj = { x: startLook.x, y: startLook.y, z: startLook.z };
+    const startFov = camera.fov;
+
+    const duration = 1400;
+    const startTime = performance.now();
+
+    function animateWalk(now) {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+      camera.position.set(
+        startPos.x + (endPos.x - startPos.x) * ease,
+        startPos.y + (endPos.y - startPos.y) * ease,
+        startPos.z + (endPos.z - startPos.z) * ease
+      );
+      camera.lookAt(
+        startLookObj.x + (endLook.x - startLookObj.x) * ease,
+        startLookObj.y + (endLook.y - startLookObj.y) * ease,
+        startLookObj.z + (endLook.z - startLookObj.z) * ease
+      );
+      const newFov = startFov + (endFov - startFov) * ease;
+      if (Math.abs(camera.fov - newFov) > 0.01) {
+        camera.fov = newFov;
+        camera.updateProjectionMatrix();
+      }
+
+      if (t < 1) {
+        requestAnimationFrame(animateWalk);
+      } else {
+        overlay.classList.add('active');
+        setTimeout(() => {
+          // REDIRECT: uncomment and set real URLs
+          // window.location.href = piece.link;
+          setTimeout(() => {
+            overlay.classList.remove('active');
+            isWalkingIn = false;
+          }, 2000);
+        }, 800);
+      }
+    }
+    requestAnimationFrame(animateWalk);
+  }
+
+  // ══════════════════════════════════════
+  // MOBILE MENU
+  // ══════════════════════════════════════
+  window.toggleMobile = function() {
+    document.getElementById('mobile-menu').classList.toggle('open');
+  };
+
+  // ══════════════════════════════════════
+  // ACTIVE PIECE DETECTION
+  // ══════════════════════════════════════
+  function getActivePiece(scroll) {
+    for (let i = 0; i < ZONES.length; i++) {
+      if (Math.abs(scroll - ZONES[i].center) < ZONES[i].range) return i;
+    }
+    return -1;
+  }
+
+  // ══════════════════════════════════════
+  // HELPER: walk up parent chain to find piece
+  // ══════════════════════════════════════
+  function findPieceData(obj) {
+    let current = obj;
+    while (current) {
+      if (current.userData && current.userData.pieceData) return current.userData.pieceData;
+      if (current.userData && current.userData.pieceName) {
+        const piece = INTERACTIVE_PIECES.find(p => p.blenderName === current.userData.pieceName);
+        if (piece) return piece;
+      }
+      current = current.parent;
+    }
+    return null;
+  }
+
+  // ══════════════════════════════════════
+  // RENDER LOOP
+  // ══════════════════════════════════════
+  const cursorDot = document.getElementById('cursor-dot');
+  const cursorRing = document.getElementById('cursor-ring');
+  const pieceInfoEl = document.getElementById('piece-info');
+  const mobInfoEl = document.getElementById('mobile-piece-info');
+  const pips = document.querySelectorAll('.counter-pip');
+
+  // ══════════════════════════════════════
+  // DEBUG FLY-CAMERA (press D to toggle, C to copy coords)
+  // ══════════════════════════════════════
+  let debugMode = false;
+  const debugKeys = {};
+  let debugYaw = 0, debugPitch = 0;
+  let debugDragging = false, debugLastX = 0, debugLastY = 0;
+
+  const debugHUD = document.createElement('div');
+  debugHUD.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#0f0;font:12px/1.5 monospace;padding:10px 14px;border:1px solid #0f0;border-radius:4px;z-index:9999;display:none;pointer-events:none;white-space:pre;';
+  document.body.appendChild(debugHUD);
+
+  const debugToast = document.createElement('div');
+  debugToast.style.cssText = 'position:fixed;top:90px;left:50%;transform:translateX(-50%);background:#0f0;color:#000;font:12px monospace;padding:8px 14px;border-radius:4px;z-index:10000;display:none;';
+  document.body.appendChild(debugToast);
+  function showToast(msg) {
+    debugToast.textContent = msg;
+    debugToast.style.display = 'block';
+    clearTimeout(debugToast._t);
+    debugToast._t = setTimeout(() => debugToast.style.display = 'none', 1600);
+  }
+
+  window.addEventListener('keydown', e => {
+    const k = e.key.toLowerCase();
+    if (k === 'j' && !e.repeat) {
+      debugMode = !debugMode;
+      debugHUD.style.display = debugMode ? 'block' : 'none';
+      if (debugMode) {
+        // Seed debug cam from current camera state
+        const euler = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ');
+        debugYaw = euler.y;
+        debugPitch = euler.x;
+        showToast('DEBUG ON — WASD move, drag to look, C copy, T set t, J exit');
+      } else {
+        showToast('DEBUG OFF');
+      }
+      return;
+    }
+    if (!debugMode) return;
+    if (k === 'c') {
+      const p = camera.position;
+      const look = new THREE.Vector3();
+      camera.getWorldDirection(look);
+      look.multiplyScalar(2).add(p); // point 2m ahead
+      const t = (window._debugT ?? scrollProgress).toFixed(2);
+      const line = `{ t: ${t}, pos: { x: ${p.x.toFixed(2)}, y: ${p.y.toFixed(2)}, z: ${p.z.toFixed(2)} }, look: { x: ${look.x.toFixed(2)}, y: ${look.y.toFixed(2)}, z: ${look.z.toFixed(2)} }, fov: ${camera.fov.toFixed(1)} },`;
+      navigator.clipboard.writeText(line).then(() => showToast('Copied! ' + line));
+      console.log(line);
+      return;
+    }
+    if (k === '[') { camera.fov = Math.max(10, camera.fov - 2); camera.updateProjectionMatrix(); return; }
+    if (k === ']') { camera.fov = Math.min(110, camera.fov + 2); camera.updateProjectionMatrix(); return; }
+    if (k === 't') {
+      const v = prompt('Set t value (0.0 – 1.0) for the next copy:', (window._debugT ?? scrollProgress).toFixed(2));
+      if (v !== null) window._debugT = parseFloat(v);
+      return;
+    }
+    debugKeys[k] = true;
+  });
+  window.addEventListener('keyup', e => { debugKeys[e.key.toLowerCase()] = false; });
+
+  window.addEventListener('mousedown', e => { if (debugMode) { debugDragging = true; debugLastX = e.clientX; debugLastY = e.clientY; } });
+  window.addEventListener('mouseup', () => { debugDragging = false; });
+  window.addEventListener('mousemove', e => {
+    if (!debugMode || !debugDragging) return;
+    const dx = e.clientX - debugLastX, dy = e.clientY - debugLastY;
+    debugLastX = e.clientX; debugLastY = e.clientY;
+    debugYaw -= dx * 0.003;
+    debugPitch -= dy * 0.003;
+    debugPitch = Math.max(-Math.PI / 2 + 0.01, Math.min(Math.PI / 2 - 0.01, debugPitch));
+  });
+
+  function updateDebugCamera() {
+    const speed = debugKeys['shift'] ? 0.08 : 0.03;
+    const forward = new THREE.Vector3(-Math.sin(debugYaw), 0, -Math.cos(debugYaw));
+    const right = new THREE.Vector3(Math.cos(debugYaw), 0, -Math.sin(debugYaw));
+    if (debugKeys['w']) camera.position.addScaledVector(forward, speed);
+    if (debugKeys['s']) camera.position.addScaledVector(forward, -speed);
+    if (debugKeys['a']) camera.position.addScaledVector(right, -speed);
+    if (debugKeys['d']) camera.position.addScaledVector(right, speed);
+    if (debugKeys['e']) camera.position.addScaledVector(right, speed);
+    if (debugKeys['q']) camera.position.addScaledVector(right, -speed);
+    if (debugKeys[' ']) camera.position.y += speed;
+    if (debugKeys['control']) camera.position.y -= speed;
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = debugYaw;
+    camera.rotation.x = debugPitch;
+
+    const p = camera.position;
+    const look = new THREE.Vector3();
+    camera.getWorldDirection(look);
+    look.multiplyScalar(2).add(p);
+    const t = (window._debugT ?? scrollProgress).toFixed(2);
+    const focal = camera.getFocalLength().toFixed(1);
+    debugHUD.textContent =
+      `DEBUG  [WASD move · Shift=fast · Space/Ctrl up/down · drag=look · [ ] zoom · C=copy · T=set t · J=exit]\n` +
+      `t: ${t}   scroll: ${scrollProgress.toFixed(2)}   fov: ${camera.fov.toFixed(1)}°   focal: ${focal}mm\n` +
+      `{ t: ${t}, pos: { x: ${p.x.toFixed(2)}, y: ${p.y.toFixed(2)}, z: ${p.z.toFixed(2)} }, look: { x: ${look.x.toFixed(2)}, y: ${look.y.toFixed(2)}, z: ${look.z.toFixed(2)} }, fov: ${camera.fov.toFixed(1)} },`;
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+
+    scrollProgress += (targetScroll - scrollProgress) * 0.055;
+
+    if (hasLooped) {
+      if (scrollProgress >= 1) { scrollProgress -= 1; targetScroll -= 1; }
+      else if (scrollProgress < 0) { scrollProgress += 1; targetScroll += 1; }
+    }
+
+    document.getElementById('progress').style.width = `${scrollProgress * 100}%`;
+    document.getElementById('header').classList.toggle('scrolled', scrollProgress > 0.02);
+    document.getElementById('intro').classList.toggle('hidden', scrollProgress > 0.04);
+
+    if (!isWalkingIn && !debugMode) {
+      const state = getCameraState(scrollProgress);
+      camera.position.set(state.pos.x, state.pos.y, state.pos.z);
+      camera.lookAt(state.look.x, state.look.y, state.look.z);
+      if (Math.abs(camera.fov - state.fov) > 0.01) {
+        camera.fov = state.fov;
+        camera.updateProjectionMatrix();
+      }
+    }
+    if (debugMode) updateDebugCamera();
+
+    // Cursor spring
+    ringX += (cursorX - ringX) * 0.1;
+    ringY += (cursorY - ringY) * 0.1;
+    cursorDot.style.left = cursorX + 'px';
+    cursorDot.style.top = cursorY + 'px';
+    cursorRing.style.left = ringX + 'px';
+    cursorRing.style.top = ringY + 'px';
+
+    // Raycasting
+    hoveredPiece = null;
+    if (sceneReady && !isWalkingIn && interactiveMeshes.length > 0) {
+      raycaster.setFromCamera(mouse, camera);
+      const hits = raycaster.intersectObjects(interactiveMeshes);
+      if (hits.length > 0) {
+        const pieceData = findPieceData(hits[0].object);
+        if (pieceData) {
+          hoveredPiece = pieceData;
+          cursorRing.classList.add('hovering');
+
+          pieceInfoEl.classList.add('visible');
+          pieceInfoEl.style.left = (cursorX + 28) + 'px';
+          pieceInfoEl.style.top = (cursorY - 24) + 'px';
+          document.getElementById('pieceCollection').textContent = pieceData.collection || '';
+          document.getElementById('pieceName').textContent = pieceData.desc;
+        }
+      }
+    }
+
+    if (!hoveredPiece) {
+      cursorRing.classList.remove('hovering');
+      pieceInfoEl.classList.remove('visible');
+    }
+
+    // Hover highlight — emissive boost on the hovered piece
+    for (let i = 0; i < interactiveMeshes.length; i++) {
+      const mesh = interactiveMeshes[i];
+      const target = (hoveredPiece && mesh.userData.pieceName === hoveredPiece.blenderName) ? 1 : 0;
+      mesh.userData._highlight += (target - mesh.userData._highlight) * 0.15;
+      const h = mesh.userData._highlight;
+      if (h < 0.001 && target === 0) continue; // skip when fully off
+      const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      for (let j = 0; j < mats.length; j++) {
+        const m = mats[j];
+        if (!m || !m.emissive || !m.userData || !m.userData._origEmissive) continue;
+        m.emissive.copy(m.userData._origEmissive).lerp(HIGHLIGHT_COLOR, h * 0.85);
+        m.emissiveIntensity = m.userData._origEmissiveIntensity + h * 0.6;
+      }
+    }
+
+    // Active piece (counter + mobile)
+    const newActive = getActivePiece(scrollProgress);
+    if (newActive !== activePieceIndex) {
+      activePieceIndex = newActive;
+      pips.forEach((p, i) => p.classList.toggle('active', i === activePieceIndex));
+
+      if (activePieceIndex >= 0) {
+        const p = INTERACTIVE_PIECES[activePieceIndex];
+        mobInfoEl.classList.add('visible');
+        document.getElementById('mobPieceName').textContent =
+          (p.collection ? p.collection + ': ' : '') + p.displayName;
+      } else {
+        mobInfoEl.classList.remove('visible');
+      }
+    }
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // ══════════════════════════════════════
+  // RESIZE
+  // ══════════════════════════════════════
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+})();
+</script>
+</body>
+</html>
