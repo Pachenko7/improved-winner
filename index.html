@@ -360,9 +360,15 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/EXRLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/GammaCorrectionShader.js"></script>
 <script>
 (() => {
   'use strict';
@@ -371,6 +377,13 @@
   // CONFIG
   // ══════════════════════════════════════
   const STUDIO_URL = 'https://raw.githubusercontent.com/Pachenko7/3D-Assets/main/Studio.glb';
+  const HDRI_URL   = 'https://raw.githubusercontent.com/Pachenko7/3D-Assets/main/Studio_HDRI.exr';
+
+  // Environment reflection strength on all piece materials. Tune 0.5–1.0.
+  const ENV_INTENSITY = 0.7;
+
+  // Match the CSS @media (max-width: 768px) breakpoint for mobile behaviour.
+  const isMobile = window.innerWidth <= 768;
 
   // Interactive pieces — names must match Blender object/collection names
   // Order: anticlockwise — Atelier (right) → Zephyr (center) → Bloom (left)
@@ -471,11 +484,29 @@
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.physicallyCorrectLights = true;
 
-  // Neutral environment map for accurate PBR colors (low intensity, used for material color not lighting)
+  // PBR environment map — loaded below via EXRLoader, routed through the preloader's LoadingManager.
   const pmrem = new THREE.PMREMGenerator(renderer);
   pmrem.compileEquirectangularShader();
-  scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
   document.body.appendChild(renderer.domElement);
+
+  // ══════════════════════════════════════
+  // POST-PROCESSING (bloom only, disabled on mobile)
+  // ══════════════════════════════════════
+  const composer = new THREE.EffectComposer(renderer);
+  composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  composer.setSize(window.innerWidth, window.innerHeight);
+  composer.addPass(new THREE.RenderPass(scene, camera));
+  // Soft halo on bright speculars. Kept conservative so the editorial darkness isn't washed out.
+  const bloomPass = new THREE.UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    0.35,   // strength
+    0.6,    // radius
+    0.85    // threshold
+  );
+  if (!isMobile) composer.addPass(bloomPass);
+  // Gamma correction — r128 EffectComposer doesn't honour renderer.outputEncoding; without this final
+  // pass the scene reads as washed out compared to renderer.render() directly.
+  composer.addPass(new THREE.ShaderPass(THREE.GammaCorrectionShader));
 
   // ══════════════════════════════════════
   // LIGHTING
@@ -531,6 +562,15 @@
   const gltfLoader = new THREE.GLTFLoader(loadingManager);
   gltfLoader.setDRACOLoader(dracoLoader);
 
+  // Studio HDRI — prefiltered via PMREM, assigned as scene.environment only (background stays fog+bg).
+  const exrLoader = new THREE.EXRLoader(loadingManager);
+  exrLoader.load(HDRI_URL, (texture) => {
+    const envMap = pmrem.fromEquirectangular(texture).texture;
+    scene.environment = envMap;
+    texture.dispose();
+    pmrem.dispose();
+  });
+
   // Store references to interactive pieces
   const interactiveMeshes = [];  // for raycasting
   const pieceObjects = {};       // name → THREE.Object3D
@@ -548,7 +588,7 @@
         mats.forEach(m => {
           if (m.map) m.map.encoding = THREE.sRGBEncoding;
           if (m.emissiveMap) m.emissiveMap.encoding = THREE.sRGBEncoding;
-          m.envMapIntensity = 0.5;
+          m.envMapIntensity = ENV_INTENSITY;
           m.needsUpdate = true;
         });
         // Override podium / wall / floor / ceiling to black
@@ -1044,7 +1084,7 @@
       }
     }
 
-    renderer.render(scene, camera);
+    composer.render();
   }
   animate();
 
@@ -1055,6 +1095,8 @@
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth, window.innerHeight);
+    bloomPass.setSize(window.innerWidth, window.innerHeight);
   });
 
 })();
